@@ -24,7 +24,7 @@ webXray requires Python 3.4+ and Google Chrome to function, pip3 for dependency 
 
 3)  Clone this repository from GitHub:
 
-        git clone https://github.com/timlib/webXray.git
+        git clone https://github.com/timlib/webxray.git
 
 4) To install Python dependencies (websocket-client, textstat, lxml, and psycopg2), run the following command:
 
@@ -39,13 +39,13 @@ webXray requires Python 3.4+ and Google Chrome to function, pip3 for dependency 
 
 To start webXray in interactive mode type:
 
-    python3 run_webXray.py
+    python3 run_webxray.py
 
 The prompts will guide you to scanning a sample list of websites using the default settings of Chrome in windowed mode and a SQLite database.  If you wish to run several browsers in parallel to increase speed, leverage a more powerful database engine, or perform other advanced tasks, please see the [project website](http://webXray.org/#advanced_options) for details.
 
 To see how to control webXray via command-line flags, type the following:
 
-    python3 run_webXray.py -h
+    python3 run_webxray.py -h
 
 # Using webXray to Analyze Your Own List of Pages
 
