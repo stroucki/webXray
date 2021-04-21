@@ -163,7 +163,10 @@ def interaction():
 			print('\tThe following webXray databases are available:')
 			
 			db_name = utilities.select_wbxr_db()
-			print('\tUsing database: %s' % db_name)
+			if db_name:
+				print('\tUsing database: %s' % db_name)
+			else:
+				quit()
 		
 		# we have selected the db to use, now move on to collection	
 		print('\t--------------------')
@@ -232,6 +235,10 @@ def interaction():
 		print('\t----------------------------------------------')
 		
 		db_name = utilities.select_wbxr_db()
+		if db_name:
+			print('\tUsing database: %s' % db_name)
+		else:
+			quit()
 
 		print('\tUsing database: %s' % db_name)
 
@@ -251,6 +258,10 @@ def interaction():
 		print('\t----------------------------------------------')
 		
 		db_name = utilities.select_wbxr_db()
+		if db_name:
+			print('\tUsing database: %s' % db_name)
+		else:
+			quit()
 
 		print('\tUsing database: %s' % db_name)
 
@@ -270,6 +281,10 @@ def interaction():
 		print('\t----------------------------------------------')
 		
 		db_name = utilities.select_wbxr_db()
+		if db_name:
+			print('\tUsing database: %s' % db_name)
+		else:
+			quit()
 
 		print('\tUsing database: %s' % db_name)
 
@@ -535,7 +550,6 @@ if __name__ == '__main__':
   \ V  V /  __/ |_) /  \| | | (_| | |_| |
    \_/\_/ \___|_.__/_/\_\_|  \__,_|\__, |
                                    |___/
-		[Forensic Edition v1.0]
     ''')
 
 	# set up cli args
