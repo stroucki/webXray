@@ -425,7 +425,7 @@ def analyze(db_name):
 	num_results	= 500
 
 	# set up a new reporter
-	reporter = Reporter(db_name, db_engine, num_tlds, num_results, flush_domain_owners=True)
+	reporter = Reporter(db_name, db_engine, num_tlds, num_results, flush_domain_owners=False)
 
 	# this is the main suite of reports, comment out those you don't need
 	reporter.generate_db_summary_report()
@@ -474,7 +474,7 @@ def policy_report(db_name):
 	num_results	= 100
 
 	# set up a new reporter
-	reporter = Reporter(db_name, db_engine, num_tlds, num_results, flush_domain_owners=True)
+	reporter = Reporter(db_name, db_engine, num_tlds, num_results, flush_domain_owners=False)
 
 	# do relevant policy reports
 	reporter.initialize_policy_reports()
