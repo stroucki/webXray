@@ -66,7 +66,7 @@ Use the interactive mode to guide you to generating an analysis once you have co
  
 # Advanced Installation: Speed, Parallelization, and Distributed Architecture for Massive Scans
 
-Visit [webxray.org](https://webxray.org) for extensive instructions on how to leverage the most advanced features of webXray.  The software may be used to create multi-billion point datasets and has been leveraged to conduct globally distributed scans and has been able to clear one million page loads per day in testing.
+Visit [webxray.org](https://webxray.org) for extensive instructions on how to leverage the most advanced features of webXray.  The software may be used to create multi-billion point datasets, has been leveraged to conduct globally distributed scans, and has been able to clear one million page loads per day in testing.
 
 # Academic Citation
 
