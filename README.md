@@ -14,7 +14,7 @@ webXray and policyXray are professional tools designed for academic research, an
 
 More information and detailed installation instructions may be found on the [project website](http://webXray.org).
 
-# Installation
+# Basic Installation
 
 webXray requires Python 3.4+ and Google Chrome to function, pip3 for dependency installation, and Readability.js for text extraction.  These may be installed in the following steps:
 
@@ -64,13 +64,9 @@ Use the interactive mode to guide you to generating an analysis once you have co
 * __3p\_uses.csv__: percentages of pages with third-parties performing specified functions
 * __per_site_network_report__: pairings between page domains and third-party domains, you can import this info to network visualization software
  
-# Important Note on Speed and Parallelization
+# Advanced Installation: Speed, Parallelization, and Distributed Architecture for Massive Scans
 
-webXray can load many pages in parallell and is capable of scanning over one million pages a day when leveraging a cluster of machines.  However, out-of-the-box, webXray is configured to only scan one page at a time on a normal laptop.  If you think your system can handle more concurrent browsers (and chances are it can!), open the 'run\_webXray.py' file and search for the first occurrence of the 'pool\_size' variable.  When you find that there are instructions on how to increase the numbers of pages you can do concurrently.  
-
-# Leveraging Distributed Architecture for Massive Scans
-
-Future documentation updates will detail how to deploy webXray on a cluster of machines, which may be geographically distributed.
+Visit [webxray.org](https://webxray.org) for extensive instructions on how to leverage the most advanced features of webXray.  The software may be used to create multi-billion point datasets and has been leveraged to conduct globally distributed scans and has been able to clear one million page loads per day in testing.
 
 # Academic Citation
 
