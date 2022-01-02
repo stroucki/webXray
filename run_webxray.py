@@ -25,7 +25,7 @@ if db_engine == 'sqlite':
 	from webxray.SQLiteDriver import SQLiteDriver
 	sql_driver = SQLiteDriver()
 
-	# pool_size sets how many parellel processes are run
+	# pool_size sets how many parallel processes are run
 	#	when using sqlite we set to 1 to avoid issues with
 	#	multiple processes trying to use sqlite.
 	pool_size = 1
@@ -432,6 +432,7 @@ def analyze(db_name):
 	reporter.generate_stats_report()
 	reporter.generate_aggregated_tracking_attribution_report()
 	reporter.generate_3p_domain_report()
+	reporter.generate_3p_aggregate_owner_report()
 	reporter.generate_3p_request_report()
 	reporter.generate_3p_request_report('script')
 	reporter.generate_use_report()
@@ -519,7 +520,7 @@ def rate_estimate(db_name, client_id):
 def store_results_from_queue():
 	"""
 	If we have results in our result_queue we will
-		process/store them.  Can be run in parallell
+		process/store them.  Can be run in parallel
 		with server if set to queue results.
 	"""
 	from webxray.Collector import Collector
