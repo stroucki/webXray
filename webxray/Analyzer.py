@@ -620,6 +620,55 @@ class Analyzer:
 		return domain_percentages
 	# get_3p_domain_percentages
 
+	def get_3p_aggregate_owner_percentages(self,tld_filter=None):
+		"""
+		For 3p domains, aggregate percentages by the ultimate owner
+		"""
+
+		# total crawls for this tld, used to calculate percentages
+		if tld_filter:
+			total_crawls = self.crawl_counts_by_tld[tld_filter]
+		else:
+			total_crawls = self.total_crawls
+
+		all_3p_domains = []
+		for crawl_id in self.crawl_id_to_3p_domain_info:
+			seen_owners = {}
+			for item in self.crawl_id_to_3p_domain_info[crawl_id]:
+				# derive ultimate owner
+				owner_id = item['owner_id']
+				while owner_id:
+					parent_id = self.domain_owners[owner_id]['parent_id']
+					if not parent_id:
+						break
+					owner_id = parent_id
+				# only keep one instance of a 3rd
+				# party ultimate owner for aggregation
+				if owner_id not in seen_owners:
+					all_3p_domains.append((str(owner_id or ''), owner_id))
+					seen_owners[owner_id] = True
+
+		domain_percentages = []
+		for item, domain_crawl_count in self.utilities.get_most_common_sorted(all_3p_domains):
+			owner_id 	= item[1]
+
+			# if we know the owner get name and country, otherwise None
+			if owner_id != None:
+				owner_name 		= self.domain_owners[owner_id]['owner_name']
+				owner_country 	= self.domain_owners[owner_id]['country']
+			else:
+				owner_name 		= None
+				owner_country 	= None
+
+			domain_percentages.append({
+				'percent_crawls': 100*(domain_crawl_count/total_crawls),
+				'owner_id'		: owner_id,
+				'owner_name'	: owner_name,
+				'owner_country'	: owner_country
+			})
+		return domain_percentages
+	# get_3p_aggregate_owner_percentages
+
 	def get_3p_request_percentages(self,tld_filter=None,request_type=None):
 		"""
 		Determine what percentage of pages a given request is found on.  

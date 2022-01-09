@@ -300,6 +300,33 @@ class Reporter:
 				self.utilities.write_csv(self.report_path,'3p_domains.csv',csv_rows)
 	# generate_3p_domain_report
 
+	def generate_3p_aggregate_owner_report(self):
+		"""
+		This report tells us the most commonly occuring third-party owners.
+		"""
+		print('\t==============================')
+		print('\t Processing 3P Aggregate Owners Report ')
+		print('\t==============================')
+
+		for tld_filter in self.top_tlds:
+			csv_rows = []
+			csv_rows.append(('percent_total','owner','owner_country'))
+
+			# get_3p_domain_percentages returns a list, we slice it to get only desired num_results
+			for item in self.analyzer.get_3p_aggregate_owner_percentages(tld_filter)[:self.num_results]:
+
+				csv_rows.append((
+					item['percent_crawls'],
+					item['owner_name'],
+					item['owner_country'],
+				))
+
+			if tld_filter:
+				self.utilities.write_csv(self.report_path,tld_filter+'-3p_aggregate_owners.csv',csv_rows)
+			else:
+				self.utilities.write_csv(self.report_path,'3p_aggregate_owners.csv',csv_rows)
+	# generate_3p_aggregate_owner_report
+
 	def generate_3p_request_report(self,request_type=None):
 		"""
 		this queries the db to get all requests, domains, or domain owners
