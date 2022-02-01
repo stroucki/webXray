@@ -424,6 +424,8 @@ def analyze(db_name):
 	# set reports to only get the top X results, set to None to get everything
 	num_results	= 500
 
+	utilities = Utilities(db_name, db_engine)
+
 	# set up a new reporter
 	reporter = Reporter(db_name, db_engine, num_tlds, num_results, flush_domain_owners=False)
 
