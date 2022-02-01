@@ -33,6 +33,12 @@ class SQLiteDriver:
 	# GENERAL PURPOSE #
 	#-----------------#
 
+	def dict_factory(self, cursor, row):
+		d = {}
+		for idx, col in enumerate(cursor.description):
+			d[col[0]] = row[idx]
+		return d
+
 	def md5_text(self,text):
 		"""
 		this class is unique to the sqlite driver as md5 is not built in
@@ -2171,6 +2177,19 @@ class SQLiteDriver:
 		""")
 		return self.db.fetchone()[0]
 	# get_ssl_page_count
+
+	def get_crawls(self):
+		"""
+		Get all crawl data
+		"""
+		cur = self.db_conn.cursor()
+		cur.row_factory = self.dict_factory
+		cur.execute("""
+			select * from page
+		""")
+		data = cur.fetchall()
+		cur.close()
+		return data
 
 	def get_crawl_count(self):
 		"""

@@ -8,6 +8,7 @@ try:
 	import psycopg2
 	# required to create new dbs
 	from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+	import psycopg2.extras
 except:
 	print('**************************************************************')
 	print(' The psycopg2 library is needed to use Postgres with webXray. ')
@@ -2384,6 +2385,18 @@ class PostgreSQLDriver:
 		""")
 		return self.db.fetchone()[0]
 	# get_ssl_page_count
+
+	def get_crawls(self):
+		"""
+		Get all crawl data
+		"""
+		cur = self.db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+		cur.execute("""
+			select * from page
+		""")
+		data = cur.fetchall()
+		cur.close()
+		return data
 
 	def get_crawl_count(self):
 		"""
