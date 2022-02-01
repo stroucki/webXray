@@ -17,7 +17,7 @@ class Reporter:
 	Manages the production of a number of CSV reports.
 	"""
 
-	def __init__(self, db_name, db_engine, num_tlds, num_results, tracker_threshold = None, flush_domain_owners = False, start_date = False, end_date = False):
+	def __init__(self, db_name, db_engine, num_tlds, num_results, tracker_threshold = None, flush_domain_owners = False, start_date = False, end_date = False, subset_list = []):
 		"""
 		This performs a few start-up tasks:
 			- sets up some useful global variables
@@ -33,12 +33,13 @@ class Reporter:
 		self.num_tlds 			= num_tlds
 		self.num_results 		= num_results
 		self.tracker_threshold	= tracker_threshold
+		self.subset_list		= subset_list
 
 		# pass utilities the database info
 		self.utilities 			= Utilities(db_name, db_engine)
 
 		# set up the analyzer we will be using throughout
-		self.analyzer			= Analyzer(db_name, db_engine, flush_domain_owners)
+		self.analyzer			= Analyzer(db_name, db_engine, flush_domain_owners, subset_list)
 		
 		# number of decimal places to round to in reports
 		self.num_decimals		= 2

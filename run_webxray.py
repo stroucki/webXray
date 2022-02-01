@@ -407,7 +407,7 @@ def worker_collect(db_name):
 	utilities.print_runtime('Data collection', start_time)
 # worker_collect
 
-def analyze(db_name):
+def analyze(db_name, subset=None):
 	"""
 	perform analysis, generate reports and store them in ./reports
 	may also be called in stand-alone with 'run_webxray.py -a [DB_NAME]'
@@ -426,8 +426,28 @@ def analyze(db_name):
 
 	utilities = Utilities(db_name, db_engine)
 
+	# process the subset list
+	subset_list = []
+	if subset:
+		try:
+			url_list = open(subset, "r", encoding="utf-8")
+			for url in url_list:
+				# skip lines that are comments
+				if "#" in url[0]: continue
+				# make sure url is valid
+				if not utilities.is_url_valid(url):
+					print(f'\t\t\subset {url} is invalid')
+					continue
+				# perform idna fix
+				url = utilities.idna_encode_url(url)
+				# add to list
+				subset_list.append(url)
+			url_list.close()
+		except:
+			print("Problem loading subset list file %s" % subset)
+
 	# set up a new reporter
-	reporter = Reporter(db_name, db_engine, num_tlds, num_results, flush_domain_owners=False)
+	reporter = Reporter(db_name, db_engine, num_tlds, num_results, flush_domain_owners=False, subset_list=subset_list)
 
 	# this is the main suite of reports, comment out those you don't need
 	reporter.generate_db_summary_report()
@@ -591,7 +611,7 @@ if __name__ == '__main__':
 		'-a',
 		action='store_true',
 		dest='analyze',
-		help='Analyze Unattended: Best for Large Datasets - Args: [db_name]'
+		help='Analyze Unattended: Best for Large Datasets - Args: <db_name> [subset of urls]'
 	)
 	parser.add_option(
 		'--policy_collect',
@@ -680,10 +700,13 @@ if __name__ == '__main__':
 	elif mode == 'analyze':
 		try:
 			db_name = args[0]
+			subset = None
+			if (len(args) == 2):
+				subset = args[1]
 		except:
 			print('Need a db name!')
 			quit()
-		analyze(db_name)
+		analyze(db_name, subset)
 	
 	elif mode == 'policy_collect':
 		try:

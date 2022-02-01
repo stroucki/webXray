@@ -13,7 +13,7 @@ class Analyzer:
 	This class performs analysis of our data.
 	"""
 
-	def __init__(self,db_name,db_engine, flush_domain_owners):
+	def __init__(self,db_name,db_engine, flush_domain_owners, subset_list=[]):
 
 		# set up global db connection
 		if db_engine == 'sqlite':
