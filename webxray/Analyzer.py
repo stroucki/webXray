@@ -29,12 +29,20 @@ class Analyzer:
 		# these gets reused frequently, minimize db calls by doing it up here
 		self.total_pages 	= self.sql_driver.get_complex_page_count()
 		self.total_crawls 	= self.sql_driver.get_crawl_count()
+		self.crawls		= self.sql_driver.get_crawls()
+
+		if (len(subset_list) != 0):
+			self.crawls = [x for x in self.crawls if x['start_url'] in subset_list]
+			self.total_crawls = len(self.crawls)
+			# not founds?
 
 		# pass utilities the database info
 		self.utilities = Utilities(db_name,db_engine)
 
 		# initialize the domain owner dict
 		self.domain_owners = self.utilities.get_domain_owner_dict()
+
+		self.subset_list = subset_list
 
 		# update domain owners
 		if flush_domain_owners:
@@ -58,7 +66,10 @@ class Analyzer:
 
 		# this is a class global
 		self.crawl_id_to_3p_domain_info = {}
+
+		filter_crawls = [x['crawl_id'] for x in self.crawls]
 		for crawl_id,domain,domain_owner_id in self.sql_driver.get_crawl_id_3p_domain_info():
+			if crawl_id not in filter_crawls: continue
 			if crawl_id not in self.crawl_id_to_3p_domain_info:
 				self.crawl_id_to_3p_domain_info[crawl_id] = [{'domain':domain,'owner_id':domain_owner_id}]
 			else:
