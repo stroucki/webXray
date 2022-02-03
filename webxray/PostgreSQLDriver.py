@@ -2776,7 +2776,7 @@ class PostgreSQLDriver:
 			identified the owner
 		"""
 		query = """
-				SELECT DISTINCT page_domain.domain, request_domain.domain, request_domain.domain_owner_id
+				SELECT DISTINCT page.crawl_id, page_domain.domain, request_domain.domain, request_domain.domain_owner_id
 				FROM page
 				LEFT JOIN request ON request.page_id = page.id
 				JOIN domain page_domain ON page.final_url_domain_id = page_domain.id

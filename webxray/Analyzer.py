@@ -549,7 +549,9 @@ class Analyzer:
 		"""
 		network = []
 
-		for page_domain,request_domain,request_owner_id in self.sql_driver.get_3p_network_ties():
+		filter_crawls = [x['crawl_id'] for x in self.crawls]
+		for crawl_id, page_domain,request_domain,request_owner_id in self.sql_driver.get_3p_network_ties():
+			if crawl_id not in filter_crawls: continue
 			# if we know the owner get name and country, otherwise None
 			if request_owner_id != None:
 				request_owner_name 		= self.domain_owners[request_owner_id]['owner_name']
@@ -704,8 +706,10 @@ class Analyzer:
 			total_crawls = self.crawl_counts_by_tld[tld_filter]
 		else:
 			total_crawls = self.total_crawls
-
+		filter_crawls = [x['crawl_id'] for x in self.crawls]
+		# page_id is crawl id
 		for page_id,request_url,request_type,request_domain,request_domain_owner in self.sql_driver.get_3p_requests(tld_filter, request_type):
+			if page_id not in filter_crawls: continue
 			all_3p_requests.append((request_url,request_type,request_domain,request_domain_owner))
 
 		request_percentages =[]
@@ -767,8 +771,10 @@ class Analyzer:
 		# note that due to currently unresolved chrome issues we sometimes 
 		# 	can get cookies which don't have a corresponding 3p request
 		# 	this approach handles that gracefully
+		filter_crawls = [x['crawl_id'] for x in self.crawls]
 		crawl_cookie_domains = {}
 		for crawl_id, cookie_domain in self.sql_driver.get_crawl_id_3p_cookie_domain_pairs():
+			if crawl_id not in filter_crawls: continue
 			if crawl_id not in crawl_cookie_domains:
 				crawl_cookie_domains[crawl_id] = [cookie_domain]
 			else:
