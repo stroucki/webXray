@@ -31,18 +31,24 @@ class Analyzer:
 		self.total_crawls 	= self.sql_driver.get_crawl_count()
 		self.crawls		= self.sql_driver.get_crawls()
 
+		# list of start_urls to be excluded
+		self.subset_list = subset_list
+		# list of start_urls to be excluded that have not been crawled
+		self.subset_not_found = []
+
 		if (len(subset_list) != 0):
 			self.crawls = [x for x in self.crawls if x['start_url'] in subset_list]
+			start_urls = [x['start_url'] for x in self.crawls]
 			self.total_crawls = len(self.crawls)
-			# not founds?
+			self.subset_not_found = [x for x in subset_list if x not in start_urls]
 
+		if (len(self.subset_not_found)):
+			print('Note: some domains requested for subset processing were not crawled: %s' % self.subset_not_found)
 		# pass utilities the database info
 		self.utilities = Utilities(db_name,db_engine)
 
 		# initialize the domain owner dict
 		self.domain_owners = self.utilities.get_domain_owner_dict()
-
-		self.subset_list = subset_list
 
 		# update domain owners
 		if flush_domain_owners:
