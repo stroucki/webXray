@@ -333,6 +333,7 @@ class Reporter:
 		this queries the db to get all requests, domains, or domain owners
 		next they are counted to find the most common
 		and formatted to csv rows and returned
+		Files written are 3p_request.csv or 3p_script.csv
 		"""
 		if request_type == 'script':
 			print('\t=============================')
