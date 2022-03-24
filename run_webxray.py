@@ -9,15 +9,11 @@
 
 # standard python packages
 import datetime
-import multiprocessing
 import optparse
 import os
 import re
 import socket
-import sys
 import time
-import urllib.parse
-import urllib.request
 
 # set up database connection
 db_engine = 'sqlite'
