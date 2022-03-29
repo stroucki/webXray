@@ -83,7 +83,7 @@ class Collector:
 			from webxray.PostgreSQLDriver import PostgreSQLDriver
 			sql_driver = PostgreSQLDriver(self.db_name)
 		else:
-			print('INVALID DB ENGINE FOR %s, QUITTING!' % db_engine)
+			print('INVALID DB ENGINE FOR %s, QUITTING!' % self.db_engine)
 			quit()
 
 		# keep getting tasks from queue until none are left at max attempt level
