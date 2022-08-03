@@ -84,7 +84,10 @@ class ChromeDriver:
 		chrome_cmd += ' --disable-gpu'
 
 		# set up headless
-		if self.headless: chrome_cmd += ' --headless'
+		if self.headless:
+			chrome_cmd += ' --headless'
+			# default is 800x600
+			chrome_cmd += ' --window-size=1024,768'
 
 		# if we're in production send the subprocess output to dev/null, None is normal
 		if not self.debug:
@@ -126,12 +129,12 @@ class ChromeDriver:
 		# prevent downloading files, the /dev/null is redundant
 		if self.debug: print('going to disable downloading')
 		response = self.get_single_ws_response('Page.setDownloadBehavior','"behavior":"deny","downloadPath":"/dev/null"')
+		if self.debug: print(f'{response}')
 		if response['success'] == False:
 			self.exit()
 			return response
 		else:
 			response = response['result']
-		if self.debug: print(f'{response}')
 		
 		# done
 		return
@@ -194,6 +197,7 @@ class ChromeDriver:
 		if self.launched:
 			self.send_ws_command('Browser.close')
 			self.devtools_connection.close()
+			self.launched = False
 	# exit
 
 	def get_crawl(self, url_list):
@@ -236,7 +240,7 @@ class ChromeDriver:
 
 	def get_random_crawl(self, seed_url):
 		"""
-		Based on an intial seed page conducts a first scan to
+		Based on an initial seed page conducts a first scan to
 			get traffic and links, then loads additional pages
 			on the same site based on links.
 
@@ -553,7 +557,7 @@ class ChromeDriver:
 			# Keep track of how long we've been reading ws data
 			response_loop_start = datetime.datetime.now()
 
-			# Keetp track of when we last saw a Network event
+			# Keep track of when we last saw a Network event
 			time_since_last_response = datetime.datetime.now()
 
 			# Length of time since we last saw a Network event
@@ -572,12 +576,11 @@ class ChromeDriver:
 				# update how long we've been going
 				loop_elapsed = (datetime.datetime.now()-response_loop_start).total_seconds()
 
-				# perform two scrolls once a second
+				# perform a scroll once a second
 				if int(loop_elapsed) > last_second:
 					last_second = int(loop_elapsed)
-					for i in range(0,10):
+					for i in range(0,1):
 						if self.debug: print(f'{last_second} : performing scroll #{i}')
-						self.do_scroll()
 						self.do_scroll()
 
 				# see if time to stop
@@ -593,7 +596,7 @@ class ChromeDriver:
 				devtools_response = self.get_next_ws_response()
 
 				# determine how long since we last got a response with
-				#	a Network event, if we didn't get a response we wait
+				#	a Network event, if we didn't get any response we wait
 				#	for a second
 				if devtools_response:
 					if 'method' in devtools_response:
@@ -743,11 +746,12 @@ class ChromeDriver:
 			if response['success'] == False:
 				self.exit()
 				return response
+			# not get_text_only
 		else:
 			# if we are not getting the log we still do the prewait/scroll
 			if self.debug: print(f'going to prewait for {self.prewait}')
 			for i in range(0,self.prewait):
-				self.do_scroll
+				self.do_scroll()
 				time.sleep(1)
 		
 		#####################
@@ -940,6 +944,7 @@ class ChromeDriver:
 
 			# if we're still processing responses after 3 min, kill it
 			if loop_elapsed > 180:
+				print(f'leaving {url} because waiting over 3 mins')
 				self.exit()
 				return ({
 					'success': False,
@@ -1503,7 +1508,14 @@ class ChromeDriver:
 		Performs a random scroll action on Y axis, can be called at regular
 			intervals to surface content on pages.
 		"""
-		self.send_ws_command('Input.dispatchMouseEvent','"x":0,"y":0,"type":"mouseWheel","deltaX":0,"deltaY":%s' % random.randrange(10,100))
+		xloc = random.randrange(50,100)
+		yloc = random.randrange(50,100)
+		# CNN is about 10000 pixels long
+		# 10000 pixels in 60 seconds, expected value
+		# 167 pixels per second?
+		ydelta = random.randrange(133, 200)
+		#print(f'ydelta: {ydelta}')
+		self.send_ws_command('Input.dispatchMouseEvent', f'"x":{xloc},"y":{yloc},"type":"mouseWheel","deltaX":0,"deltaY":{ydelta}')
 	# do_scroll
 
 # ChromeDriver
