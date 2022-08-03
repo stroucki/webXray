@@ -14,10 +14,12 @@ import urllib.request
 #		https://github.com/websocket-client/websocket-client
 # pip3 install websocket-client
 from websocket import create_connection
+from websocket import WebSocketTimeoutException
 
 # standard python packages
 from urllib.parse import urlsplit
 from urllib.parse import urlunsplit
+from collections import deque
 
 # custom webxray libraries
 from webxray.ParseURL  import ParseURL
@@ -121,10 +123,13 @@ class ChromeDriver:
 
 		# important, makes sure we don't get stuck
 		#	waiting for messages to arrive
-		self.devtools_connection.settimeout(3)
+		self.devtools_connection.settimeout(1)
 
 		# this is incremented globally
 		self.current_ws_command_id = 0
+
+		# holds incoming messages, response deque
+		self.responses = deque()
 
 		# prevent downloading files, the /dev/null is redundant
 		if self.debug: print('going to disable downloading')
@@ -142,22 +147,22 @@ class ChromeDriver:
 
 	def get_single_ws_response(self,method,params=''):
 		"""
-		Attempt to send ws_command and return response, note this only works
-			if you don't have the queue being flooded with network events,
+		Attempt to send ws_command and return response,
 			handles crashes gracefully.
 		"""
-		self.current_ws_command_id += 1
-		try:
-			self.devtools_connection.send('{"id":%s,"method":"%s","params":{%s}}' % (self.current_ws_command_id,method,params))
-			return ({
-				'success'	: True,
-				'result'	: json.loads(self.devtools_connection.recv())
-			})
-		except:
-			return ({
-				'success'	: False,
-				'result'	: 'Crashed on get_single_ws_response.'
-			})
+
+		response = self.send_ws_command(method, params)
+		if response['success'] == False:
+			self.exit()
+			return response
+		else:
+			ws_id = response['result']
+
+		response = self.getResponse(ws_id)
+		return({
+			'success'	: True,
+			'result'	: response
+		})
 	# get_single_ws_response
 
 	def send_ws_command(self,method,params='',override_id=None):
@@ -184,10 +189,61 @@ class ChromeDriver:
 			timeout or crash.
 		"""
 		try:
-			return json.loads(self.devtools_connection.recv())
-		except:
+			# if queue is empty, start reading available responses
+			fillqueue = True if (len(self.responses) == 0) else False
+			fill_start = datetime.datetime.now()
+			while fillqueue:
+				msg = self.devtools_connection.recv()
+				response = json.loads(msg)
+				self.responses.append(response)
+				fill_time = (datetime.datetime.now()-fill_start).total_seconds()
+				# if reading longer than a second, break
+				if fill_time > 0: break
+				# if queue has a lot of items, break
+				if len(self.responses) > 1000: break
+		except WebSocketTimeoutException:
+			# fine, it has broken out of the loop
+			pass
+		except Exception as x:
+			print(f'Exception: {x.__class__.__name__}')
+		# seen WebSocketConnectionClosedException
+
+		try:
+			response = self.responses.popleft()
+			return response
+		except IndexError:
 			return None
 	# get_next_ws_response
+
+	def getResponse(self, id):
+		"""
+		Pick out a specific response
+		"""
+		# search the queue first
+		i = 0
+		inQueue = False
+		for reponse in self.responses:
+			if (response['id'] == id):
+				inQueue = True
+				break
+			i += 1
+		if inQueue:
+			del self.responses[i]
+			return response
+
+		# blocking for the reply
+		while True:
+			try:
+				msg = self.devtools_connection.recv()
+				response = json.loads(msg)
+				if ('id' in response and response['id'] == id):
+					return response
+				# add other responses to the queue
+				self.responses.append(response)
+			except WebSocketTimeoutException:
+				pass
+
+	# getResponse
 
 	def exit(self):
 		"""
@@ -588,7 +644,7 @@ class ChromeDriver:
 				if loop_elapsed < self.prewait:
 					if self.debug: print(f'{loop_elapsed}: In prewait period')
 
-				if loop_elapsed > self.prewait and (elapsed_no_event > self.no_event_wait or loop_elapsed > self.max_wait):
+				if len(self.responses) == 0 and loop_elapsed > self.prewait and (elapsed_no_event > self.no_event_wait or loop_elapsed > self.max_wait):
 					if self.debug: print(f'{loop_elapsed} No event for {elapsed_no_event}, max_wait is {self.max_wait}, breaking Network log loop.')
 					break
 
@@ -929,16 +985,6 @@ class ChromeDriver:
 		# Keep going until we get all the pending responses or 3min timeout
 		while True:
 
-			# if result is None we are either out of responses (prematurely) or
-			#	we failed
-			devtools_response = self.get_next_ws_response()
-			if not devtools_response:
-				self.exit()
-				return ({
-					'success': False,
-					'result': 'Unable to get devtools response.'
-				})
-
 			# update how long we've been going
 			loop_elapsed = (datetime.datetime.now()-response_loop_start).total_seconds()
 
@@ -951,6 +997,12 @@ class ChromeDriver:
 					'result': 'Timeout when processing devtools responses.'
 				})
 			
+			# if result is None we are either out of responses (prematurely) or
+			#	we failed
+			devtools_response = self.get_next_ws_response()
+			if not devtools_response:
+				continue
+
 			if self.debug: print(loop_elapsed,json.dumps(devtools_response)[:100])
 
 			# if response has an 'id' see which of our commands it goes to
